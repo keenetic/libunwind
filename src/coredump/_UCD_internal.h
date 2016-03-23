@@ -35,6 +35,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.  */
 #include <sys/procfs.h> /* struct elf_prstatus */
 #endif
 #include <errno.h>
+#include <features.h>
 #include <string.h>
 #include <limits.h>
 #include <stdio.h>
@@ -43,6 +44,41 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.  */
 #include <libunwind-coredump.h>
 
 #include "libunwind_i.h"
+
+#ifndef __GLIBC__
+#include <sys/reg.h>
+
+#define EF_REG0			6
+#define EF_REG1			7
+#define EF_REG2			8
+#define EF_REG3			9
+#define EF_REG4			10
+#define EF_REG5			11
+#define EF_REG6			12
+#define EF_REG7			13
+#define EF_REG8			14
+#define EF_REG9			15
+#define EF_REG10		16
+#define EF_REG11		17
+#define EF_REG12		18
+#define EF_REG13		19
+#define EF_REG14		20
+#define EF_REG15		21
+#define EF_REG16		22
+#define EF_REG17		23
+#define EF_REG18		24
+#define EF_REG19		25
+#define EF_REG20		26
+#define EF_REG21		27
+#define EF_REG22		28
+#define EF_REG23		29
+#define EF_REG24		30
+#define EF_REG25		31
+#define EF_REG28		34
+#define EF_REG29		35
+#define EF_REG30		36
+#define EF_REG31		37
+#endif
 
 
 #if SIZEOF_OFF_T == 4
