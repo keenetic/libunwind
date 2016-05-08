@@ -42,10 +42,14 @@ endif
 
 nodist_include_HEADERS = include/libunwind-common.h
 
-SUBDIRS = src tests
+SUBDIRS = src
 
 if CONFIG_DOCS
 SUBDIRS += doc
+endif
+
+if CONFIG_TESTS
+SUBDIRS += tests
 endif
 
 noinst_HEADERS = include/dwarf.h include/dwarf_i.h include/dwarf-eh.h	\
