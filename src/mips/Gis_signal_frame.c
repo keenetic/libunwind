@@ -42,6 +42,9 @@ unw_is_signal_frame (unw_cursor_t *cursor)
 
   ip = c->dwarf.ip;
 
+  if (ip == 0)
+    return 0;
+
   /* syscall */
   if ((ret = (*a->access_mem) (as, ip + 4, &w1, 0, arg)) < 0)
     return 0;
