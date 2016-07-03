@@ -40,7 +40,7 @@
 #include <stddef.h>
 #include <string.h>
 #include <syslog.h>
-#include <sys/poll.h>
+#include <poll.h>
 #include <sys/mman.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
