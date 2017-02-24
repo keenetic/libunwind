@@ -90,18 +90,52 @@ get_dyn_info_list_addr (unw_addr_space_t as, unw_word_t *dyn_info_list_addr,
   return 0;
 }
 
+static inline int
+is_32_bit (unw_word_t w)
+{
+  return ((uint32_t) (w >> 32)) == 0;
+}
+
 static int
 access_mem (unw_addr_space_t as, unw_word_t addr, unw_word_t *val, int write,
             void *arg)
 {
+  if (as->abi == UNW_MIPS_ABI_O32 && !is_32_bit (addr))
+    {
+      Debug (1, "bad O32 ABI address %llx\n", (long long) addr);
+      return -UNW_EUNSPEC;
+    }
+
   if (write)
     {
       Debug (16, "mem[%llx] <- %llx\n", (long long) addr, (long long) *val);
-      *(unw_word_t *) (intptr_t) addr = *val;
+
+      if (as->abi == UNW_MIPS_ABI_O32)
+        {
+          if (!is_32_bit (*val))
+            {
+              Debug (1, "bad O32 ABI value %llx\n", (long long) *val);
+              return -UNW_EUNSPEC;
+            }
+
+          *(uint32_t *) addr = (uint32_t) *val;
+        }
+      else
+        {
+          *(unw_word_t *) (intptr_t) addr = *val;
+        }
     }
   else
     {
-      *val = *(unw_word_t *) (intptr_t) addr;
+      if (as->abi == UNW_MIPS_ABI_O32)
+        {
+          *val = *(uint32_t *) addr;
+        }
+      else
+        {
+          *val = *(unw_word_t *) (intptr_t) addr;
+        }
+
       Debug (16, "mem[%llx] -> %llx\n", (long long) addr, (long long) *val);
     }
   return 0;
