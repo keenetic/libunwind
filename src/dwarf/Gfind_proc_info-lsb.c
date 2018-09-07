@@ -223,19 +223,6 @@ locate_debug_info (unw_addr_space_t as, unw_word_t addr, const char *dlname,
   return fdesc;
 }
 
-static int
-debug_frame_index_compare (const void *a, const void *b)
-{
-  const struct table_entry *fa = a, *fb = b;
-
-  if (fa->start_ip_offset > fb->start_ip_offset)
-    return 1;
-  else if (fa->start_ip_offset < fb->start_ip_offset)
-    return -1;
-  else
-    return 0;
-}
-
 static size_t
 debug_frame_index_make (struct unw_debug_frame_list *fdesc)
 {
@@ -323,6 +310,35 @@ debug_frame_index_make (struct unw_debug_frame_list *fdesc)
   return count;
 }
 
+static void
+debug_frame_index_sort (struct unw_debug_frame_list *fdesc)
+{
+  size_t i, j, k, n = fdesc->index_size / sizeof (*fdesc->index);
+  struct table_entry *a = fdesc->index;
+  struct table_entry t;
+
+  /* Use a simple Shell sort as it relatively fast and
+   * does not require additional memory. */
+
+  for (k = n / 2; k > 0; k /= 2)
+    {
+      for (i = k; i < n; i++)
+        {
+          t = a[i];
+
+          for (j = i; j >= k; j -= k)
+            {
+              if (t.start_ip_offset >= a[j - k].start_ip_offset)
+                break;
+
+              a[j] = a[j - k];
+            }
+
+          a[j] = t;
+        }
+    }
+}
+
 int
 dwarf_find_debug_frame (int found, unw_dyn_info_t *di_debug, unw_word_t ip,
                         unw_word_t segbase, const char* obj_name,
@@ -377,8 +393,7 @@ dwarf_find_debug_frame (int found, unw_dyn_info_t *di_debug, unw_word_t ip,
       /* Then fill and sort the index. */
 
       debug_frame_index_make (fdesc);
-      qsort (fdesc->index, count, sizeof (struct table_entry),
-             debug_frame_index_compare);
+      debug_frame_index_sort (fdesc);
 
     /*for (i = 0; i < count; i++)
         {
